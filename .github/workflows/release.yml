@@ -28,9 +28,42 @@ jobs:
         with:
           enable_prerelease_mode: true
 
-      - name: Commit tagger
+      - name: Commit tagger pre-release
         if: github.event_name == 'pull_request'
         uses: tvdias/github-tagger@v0.0.2
         with:
           tag: ${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        if: github.event_name == 'pull_request'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.find_version.outputs.version }}
+          release_name: Pre-release ${{ steps.find_version.outputs.version }}
+          body: |
+            Pre-release ${{ steps.find_version.outputs.version }}
+          draft: false
+          prerelease: true
+
+      - name: Commit tagger release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: tvdias/github-tagger@v0.0.2
+        with:
+          tag: ${{ steps.find_version.outputs.version }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.find_version.outputs.version }}
+          release_name: Release ${{ steps.find_version.outputs.version }}
+          body: |
+            Release ${{ steps.find_version.outputs.version }}
+          draft: false
+          prerelease: false'
