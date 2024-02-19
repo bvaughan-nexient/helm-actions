@@ -7,11 +7,15 @@ on:
     branches:
       - main
 
+
 jobs:
   determine_version:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.find_version.outputs.version }}
+    permissions:
+      contents: write
+
     steps:
       - name: checkout
         uses: actions/checkout@v3
