@@ -1,0 +1,37 @@
+name: release github actions
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  determine_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.find_version.outputs.version }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: determine version
+        id: find_version
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          enable_prerelease_mode: true
+
+      - name: set prerelease tag
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}',
+              sha: context.sha
+            })
