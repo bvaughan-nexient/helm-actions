@@ -24,14 +24,9 @@ jobs:
         with:
           enable_prerelease_mode: true
 
-      - name: set prerelease tag
+      - name: Commit tagger
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v5
+        uses: tvdias/github-tagger@v0.0.2
         with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}',
-              sha: context.sha
-            })
+          tag: ${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
