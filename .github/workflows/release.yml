@@ -11,8 +11,8 @@ on:
 jobs:
   determine_version:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.find_version.outputs.version }}
+    # outputs:
+    #   version: ${{ steps.find_version.outputs.version }}
     permissions:
       contents: write
 
@@ -22,48 +22,62 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: determine version
-        id: find_version
-        uses: PaulHatch/semantic-version@v5.4.0
-        with:
-          enable_prerelease_mode: true
-
-      - name: Commit tagger pre-release
+      - name: Semver release @ Huggingface
         if: github.event_name == 'pull_request'
-        uses: tvdias/github-tagger@v0.0.2
+        uses: huggingface/semver-release-action@v1.0.0
         with:
-          tag: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          dryRun: true
+          commitAnalyzerPluginOpts: "{preset: 'angular'}"
 
-      - name: Create release
-        if: github.event_name == 'pull_request'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          release_name: Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          body: |
-            Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          draft: false
-          prerelease: true
-
-      - name: Commit tagger release
+      - name: Semver release @ Huggingface
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: tvdias/github-tagger@v0.0.2
+        uses: huggingface/semver-release-action@v1.0.0
         with:
-          tag: ${{ steps.find_version.outputs.version }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          dryRun: false
+          commitAnalyzerPluginOpts: "{preset: 'angular'}"
 
-      - name: Create release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.find_version.outputs.version }}
-          release_name: Release ${{ steps.find_version.outputs.version }}
-          body: |
-            Release ${{ steps.find_version.outputs.version }}
-          draft: false
-          prerelease: false
+      # - name: determine version
+      #   id: find_version
+      #   uses: PaulHatch/semantic-version@v5.4.0
+      #   with:
+      #     enable_prerelease_mode: true
+
+      # - name: Commit tagger pre-release
+      #   if: github.event_name == 'pull_request'
+      #   uses: tvdias/github-tagger@v0.0.2
+      #   with:
+      #     tag: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create release
+      #   if: github.event_name == 'pull_request'
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
+      #     release_name: Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
+      #     body: |
+      #       Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
+      #     draft: false
+      #     prerelease: true
+
+      # - name: Commit tagger release
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: tvdias/github-tagger@v0.0.2
+      #   with:
+      #     tag: ${{ steps.find_version.outputs.version }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create release
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ steps.find_version.outputs.version }}
+      #     release_name: Release ${{ steps.find_version.outputs.version }}
+      #     body: |
+      #       Release ${{ steps.find_version.outputs.version }}
+      #     draft: false
+      #     prerelease: false
