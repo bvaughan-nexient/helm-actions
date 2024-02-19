@@ -32,7 +32,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: tvdias/github-tagger@v0.0.2
         with:
-          tag: ${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}
+          tag: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
@@ -41,10 +41,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.find_version.outputs.version }}
-          release_name: Pre-release ${{ steps.find_version.outputs.version }}
+          tag_name: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
+          release_name: Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
           body: |
-            Pre-release ${{ steps.find_version.outputs.version }}
+            Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
           draft: false
           prerelease: true
 
@@ -66,4 +66,4 @@ jobs:
           body: |
             Release ${{ steps.find_version.outputs.version }}
           draft: false
-          prerelease: false'
+          prerelease: false
