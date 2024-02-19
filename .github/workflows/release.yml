@@ -1,0 +1,36 @@
+name: release github actions
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+
+jobs:
+  determine_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.find_version.outputs.version }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: determine version
+        id: find_version
+        uses: PaulHatch/semantic-version@v5.4.0
+        with:
+          enable_prerelease_mode: true
+
+      - name: Commit tagger
+        if: github.event_name == 'pull_request'
+        uses: tvdias/github-tagger@v0.0.2
+        with:
+          tag: ${{ steps.find_version.outputs.version }}-pre.${{ github.run_number }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
