@@ -24,7 +24,7 @@ jobs:
 
       - name: Semver release @ Huggingface
         if: github.event_name == 'pull_request'
-        uses: huggingface/semver-release-action@v1.0.0
+        uses: huggingface/semver-release-action@v1.0.1
         with:
           dryRun: true
           # commitAnalyzerPluginOpts: "{preset: 'angular'}"
@@ -33,7 +33,7 @@ jobs:
 
       - name: Semver release @ Huggingface
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: huggingface/semver-release-action@v1.0.0
+        uses: huggingface/semver-release-action@v1.0.1
         with:
           dryRun: false
           # commitAnalyzerPluginOpts: "{preset: 'angular'}"
