@@ -27,7 +27,7 @@ jobs:
         uses: huggingface/semver-release-action@v1.0.1
         with:
           dryRun: true
-          # commitAnalyzerPluginOpts: "{preset: 'angular'}"
+          commitAnalyzerPluginOpts: "{preset: 'angular'}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,7 +36,7 @@ jobs:
         uses: huggingface/semver-release-action@v1.0.1
         with:
           dryRun: false
-          # commitAnalyzerPluginOpts: "{preset: 'angular'}"
+          commitAnalyzerPluginOpts: "{preset: 'angular'}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
