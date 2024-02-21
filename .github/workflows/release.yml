@@ -28,6 +28,8 @@ jobs:
         with:
           dryRun: true
           # commitAnalyzerPluginOpts: "{preset: 'angular'}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Semver release @ Huggingface
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -35,6 +37,8 @@ jobs:
         with:
           dryRun: false
           # commitAnalyzerPluginOpts: "{preset: 'angular'}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: determine version
       #   id: find_version
