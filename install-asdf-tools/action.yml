@@ -1,5 +1,5 @@
 name: install ASDF tools from repo
-description: installs ASDF tools from the repo
+description: Install ASDF and tools defined in .tool-versions and .tool-repos if they are present in the repository.
 runs:
   using: "composite"
   steps:
@@ -22,6 +22,6 @@ runs:
     - name: Install ASDF tools
       run: |
         if [ -f .tool-versions ]; then
-          asdf install
+          awk -F'[ #]' '$NF ~ /https/ {system("asdf plugin add " $1 " " $NF)} $1 ~ /./ {system("asdf plugin add " $1 "; asdf install " $1 " " $2)}' ./.tool-versions
         fi
       shell: bash

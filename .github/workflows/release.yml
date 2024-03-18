@@ -1,90 +1,29 @@
-name: release github actions
+name: Release
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [ opened, reopened, synchronize, ready_for_review ]
-    branches: [ main ]
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      TAG_NAME:
+        description: 'Tag name that the major tag will point to'
+        required: true
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
+
+permissions:
+  contents: write
 
 jobs:
-  determine_version:
+  update_tag:
+    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
     runs-on: ubuntu-latest
-    # outputs:
-    #   version: ${{ steps.find_version.outputs.version }}
-    permissions:
-      contents: write
-
+    environment:
+      # Note: this environment is protected
+      name: Release
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - name: Update the ${{ env.TAG_NAME }} tag
+        id: update-major-tag
+        uses: actions/publish-action@v0.3.0
         with:
-          fetch-depth: 0
-
-      # - name: Semver release @ Huggingface
-      #   if: github.event_name == 'pull_request'
-      #   uses: huggingface/semver-release-action@v1.0.1
-      #   with:
-      #     dryRun: true
-      #     commitAnalyzerPluginOpts: '[{"preset": "angular"}]'
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Semver release @ Huggingface
-      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      #   uses: huggingface/semver-release-action@v1.0.1
-      #   with:
-      #     dryRun: false
-      #     commitAnalyzerPluginOpts: '[{"preset": "angular"}]'
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: determine version
-        id: find_version
-        uses: PaulHatch/semantic-version@v5.4.0
-        with:
-          enable_prerelease_mode: true
-
-      - name: Commit tagger pre-release
-        if: github.event_name == 'pull_request'
-        uses: tvdias/github-tagger@v0.0.2
-        with:
-          tag: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create release
-        if: github.event_name == 'pull_request'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          release_name: Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          body: |
-            Pre-release ${{ steps.find_version.outputs.version }}-rc.${{ github.run_number }}
-          draft: false
-          prerelease: true
-
-      - name: Commit tagger release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: tvdias/github-tagger@v0.0.2
-        with:
-          tag: ${{ steps.find_version.outputs.version }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.find_version.outputs.version }}
-          release_name: Release ${{ steps.find_version.outputs.version }}
-          body: |
-            Release ${{ steps.find_version.outputs.version }}
-          draft: false
-          prerelease: false
+          source-tag: ${{ env.TAG_NAME }}
